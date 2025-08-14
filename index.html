@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>web buat anim 🫶</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#0b1020; --txt:#fff; --muted:#a8b0c2; --accent:#ff4d73; --glass:rgba(255,255,255,.08); }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:Poppins,system-ui,sans-serif;color:var(--txt);background:linear-gradient(180deg,#0c1330,#0d1a42 40%,#0b1020);overflow-x:hidden}
+.wallpaper{position:fixed;inset:0;z-index:-2;background:#000}
+.wallpaper img{width:100%;height:100%;object-fit:cover;filter:brightness(.7)}
+.wrap{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:min(680px,92vw);background:var(--glass);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:22px;box-shadow:0 10px 40px rgba(0,0,0,.35);overflow:hidden}
+.head{padding:26px 24px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:12px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%}
+.red{background:#ff5f56}.amber{background:#ffbd2e}.green{background:#27c93f}
+.title{font-weight:600;letter-spacing:.3px}
+.stage{padding:28px 22px 30px;min-height:420px;display:grid;place-items:center}
+.center{text-align:center}
+h1{font-size:28px;line-height:1.25;margin-bottom:10px}
+h2{font-size:22px;font-weight:600;color:#f3f6ff;margin-bottom:10px}
+p{color:var(--muted);margin:6px 0 14px}
+.heart-btn{display:grid;place-items:center;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ff94ad,#ff4d73 60%,#b21e42);border:none;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 12px 24px rgba(255,77,115,.38);animation:bounce 1.8s infinite ease-in-out}
+.heart-btn svg{width:46px;height:46px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hint{margin-top:12px;color:#ffd6e0;font-size:14px}
+.img{width:140px;height:140px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.img img{width:100%;height:100%;object-fit:cover}
+.row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.btn{border:none;border-radius:14px;padding:12px 18px;font-weight:600;cursor:pointer}
+.btn-primary{background:#27c93f;color:#02220b}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.18);color:#fff}
+.small{font-size:14px;color:#c8d1ff}
+[data-step]{display:none}.show{display:block}
+
+/* Audio control */
+#audioControl{
+  position:fixed;top:12px;right:12px;z-index:999;
+  backdrop-filter:blur(8px);background:rgba(0,0,0,.4);
+  padding:8px 10px;border-radius:10px;display:flex;align-items:center;gap:8px
+}
+#audioControl button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer}
+
+/* Game area (canvas) */
+.game-wrap{position:relative;display:inline-block;width:min(92vw,420px)}
+#gameCanvas{border-radius:14px;background:#111b3d;width:100%;height:auto;display:block;transition:transform .12s}
+#gameCanvas.thump{transform:scale(1.02)}
+#hud{position:absolute;top:8px;left:12px;font-weight:700;background:rgba(0,0,0,.35);padding:6px 10px;border-radius:12px}
+#w inBadge{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.6);text-align:center;padding:0 16px}
+.badge{background:linear-gradient(90deg,#ff94ad,#ff4d73);padding:10px 16px;border-radius:16px;box-shadow:0 8px 20px rgba(255,77,115,.35)}
+</style>
+</head>
+<body>
+
+<!-- AUDIO: file MP3 disimpan di folder /audio -->
+<div id="audioControl">
+  <button id="toggleAudio" aria-label="Toggle audio">🔇</button>
+  <span style="font-weight:600">Lesung Pipi</span>
+</div>
+<audio id="bgAudio" preload="auto" loop muted playsinline>
+  <source src="audio/lesung-pipi.mp3" type="audio/mpeg">
+</audio>
+
+<div class="wallpaper" aria-hidden="true"><img src="https://htmlku.com/0/wp2.jpg" alt="Background"></div>
+<div class="wrap">
+<div class="card">
+  <div class="head">
+    <div class="dot red"></div><div class="dot amber"></div><div class="dot green"></div>
+    <div class="title">special • buat • anim🫶</div>
+  </div>
+
+  <div class="stage">
+    <!-- Step 1 -->
+    <div class="center show" data-step="1">
+      <h2>bwahahaha!<br>hmm majok 1 ya..</h2>
+      <button class="heart-btn" id="startBtn" aria-label="Sentuh LOVEnya!">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.1 21.35l-1.1-1.02C5.14 14.78 2 11.91 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41.81 4.5 2.09C12.09 4.81 13.76 4 15.5 4 18 4 20 6 20 8.5c0 3.41-3.14 6.28-8.99 11.83l-1.11 1.02z"/></svg>
+      </button>
+      <div class="hint">Sentuh <b>LOVEnya!</b> (musik nyala)</div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="center" data-step="2">
+      <h1># haloo sengg!</h1>
+      <h1>gua ada permintaan nih<br>untuk seng bwehehe</h1>
+      <div class="row"><div class="img"><img src="https://htmlku.com/0/panda/panah.gif" alt=""></div></div>
+      <button class="btn btn-primary" id="toPantun">Lanjut</button>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="center" data-step="3">
+      <div class="row"><div class="img"><img src="https://htmlku.com/0/panda/pusn2.gif" alt=""></div></div>
+      <h1>yapp permintaan maaf<br>maafin gua yaa🙏</h1>
+      <div class="row">
+        <button class="btn btn-primary" id="yesBtn">iyaa gua maafin sayangg🤍🤍</button>
+        <button class="btn btn-ghost" id="noBtn">Noo, malas</button>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="center" data-step="4">
+      <div class="row"><div class="img"><img src="https://htmlku.com/0/panda/ledekin.gif" alt=""></div></div>
+      <h2>hehehe</h2><p class="small">harus maafin donk bwhahaha</p>
+      <div class="row">
+        <div class="img"><img src="https://htmlku.com/0/panda/mikir.gif" alt=""></div>
+        <div class="img"><img src="https://htmlku.com/0/panda/inicinta2.gif" alt=""></div>
+      </div>
+      <button class="btn btn-primary" id="toYey">Lanjut</button>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="center" data-step="5">
+      <div class="row">
+        <div class="img"><img src="https://htmlku.com/0/panda/terlope2.gif" alt=""></div>
+        <div class="img"><img src="https://htmlku.com/0/panda/muah.gif" alt=""></div>
+      </div>
+      <h1>yeyy dimaafin</h1>
+      <p>makasehhh udah maafin wkwk</p>
+      <button class="btn btn-primary" id="toMain">MASIH!!😡😡</button>
+    </div>
+
+    <!-- Step 6 (baru) -->
+    <div class="center" data-step="6">
+      <h2>yaudah biar ngga merajuk<br>yok kita main game 🎮</h2>
+      <button class="btn btn-primary" id="toGame">Ayokk</button>
+    </div>
+
+    <!-- Step 7 (Game) -->
+    <div class="center" data-step="7">
+      <div class="game-wrap">
+        <div id="hud">Skor: <span id="score">0</span> / 10</div>
+        <div id="winBadge"><div class="badge">YAY MENANG! Seng dapet hati naca wkwk</div></div>
+        <canvas id="gameCanvas"></canvas>
+      </div>
+      <p class="small">Tangkap <b>10</b> hati buat menang • klik hati yang jatuh ya!</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Confetti CDN -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script>
+// ===== Helpers & Step Flow =====
+const $ = s => document.querySelector(s);
+const steps = n => {
+  document.querySelectorAll('[data-step]').forEach(el => el.classList.remove('show'));
+  document.querySelector(`[data-step="${n}"]`).classList.add('show');
+};
+
+// Step flow + start music on first interaction
+const bgAudio = document.getElementById('bgAudio');
+const toggleBtn = document.getElementById('toggleAudio');
+let audioStarted = false;
+
+function startMusicOnce(){
+  if (audioStarted) return;
+  audioStarted = true;
+  bgAudio.muted = false;
+  bgAudio.play().catch(()=>{}); // aman di mobile setelah gesture
+  toggleBtn.textContent = '🔊';
+}
+
+$("#startBtn").onclick = () => { startMusicOnce(); steps(2); };
+$("#toPantun").onclick = () => steps(3);
+$("#toYey").onclick = () => steps(5);
+$("#toMain").onclick   = () => steps(6);
+$("#toGame").onclick   = () => { steps(7); startGame(); };
+
+// Audio toggle
+toggleBtn.onclick = () => {
+  if (bgAudio.muted) {
+    bgAudio.muted = false; bgAudio.play().catch(()=>{});
+    toggleBtn.textContent = '🔊';
+  } else {
+    bgAudio.muted = true;
+    toggleBtn.textContent = '🔇';
+  }
+};
+// fallback: gesture pertama di mana saja
+window.addEventListener('pointerdown', startMusicOnce, { once:true });
+
+// No button kabur
+const noBtn = $("#noBtn"), yesBtn = $("#yesBtn");
+if(noBtn && yesBtn){
+  const moveNo = () => {
+    const p = noBtn.parentElement;
+    noBtn.style.position = 'relative';
+    noBtn.style.transform = `translate(${Math.random()*(p.clientWidth-noBtn.offsetWidth)-40}px, -${Math.random()*120}px)`;
+  };
+  noBtn.onmouseenter = moveNo;
+  noBtn.onclick = e => { e.preventDefault(); moveNo(); };
+  yesBtn.onclick = () => steps(4);
+}
+
+// ====== GAME: Tangkap Hati (canvas, responsif, tidak kepotong) ======
+const canvas = $("#gameCanvas");
+const ctx = canvas.getContext("2d");
+const scoreEl = $("#score");
+const winBadge = $("#winBadge");
+let hearts = [];
+let lastSpawn = 0;
+let score = 0;
+let running = false;
+
+// Pop sound mini (beep)
+const popSound = new Audio("data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YVkAAAAA/////wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAA");
+
+// Ukuran kanvas = lebar game-wrap, tinggi proporsional
+function resizeCanvas(){
+  const wrap = document.querySelector('.game-wrap');
+  const w = Math.floor(wrap.clientWidth);      // CSS width
+  const h = Math.floor(w * 1.5);               // portrait ratio
+  // Set ukuran bitmap (atribut) sesuai tampilan supaya tidak blur
+  canvas.width = w;
+  canvas.height = h;
+}
+function ensureVisibleThenResize(){
+  // pastikan step 7 tampil dulu baru ukur (biar clientWidth tidak 0)
+  if (document.querySelector('[data-step="7"]').classList.contains('show')) {
+    resizeCanvas();
+  }
+}
+window.addEventListener('resize', ensureVisibleThenResize);
+
+// Heart factory
+function makeHeart(){
+  const size = 26 + Math.random()*10;
+  return {
+    x: 20 + Math.random()*(canvas.width - 40),
+    y: -40,
+    size,
+    vy: 1.6 + Math.random()*1.6,
+    angle: Math.random()*Math.PI*2,
+    spin: (Math.random()*0.04 + 0.02) * (Math.random()<0.5?-1:1),
+    alpha: 1,
+    clicked: false,
+    scale: 1
+  };
+}
+
+// Gambar bentuk hati vektor
+function drawHeartPath(s){
+  const r = s/2;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.bezierCurveTo(0, -r, -s, -r, -s, 0);
+  ctx.bezierCurveTo(-s, r, 0, r*1.2, 0, r*1.8);
+  ctx.bezierCurveTo(0, r*1.2, s, r, s, 0);
+  ctx.bezierCurveTo(s, -r, 0, -r, 0, 0);
+}
+function drawHeart(h){
+  ctx.save();
+  ctx.globalAlpha = h.alpha;
+  ctx.translate(h.x, h.y);
+  ctx.rotate(h.angle);
+  ctx.scale(h.scale, h.scale);
+  ctx.fillStyle = "#ff4d73";
+  drawHeartPath(h.size);
+  ctx.fill();
+  ctx.restore();
+}
+
+function update(dt, now){
+  // spawn tiap ~0.55–0.85s
+  if(now - lastSpawn > 550 + Math.random()*300){
+    hearts.push(makeHeart());
+    lastSpawn = now;
+  }
+  // update hearts
+  for(let i=hearts.length-1; i>=0; i--){
+    const h = hearts[i];
+    if(!h.clicked){
+      h.y += h.vy * (dt/16.67);
+      h.angle += h.spin * (dt/16.67);
+    }else{
+      h.y -= 1.2 * (dt/16.67);
+      h.angle += h.spin * 2.5 * (dt/16.67);
+      h.alpha -= 0.05 * (dt/16.67);
+      h.scale += 0.02 * (dt/16.67);
+      if(h.alpha <= 0) hearts.splice(i,1);
+    }
+    if(h.y - h.size*2 > canvas.height) hearts.splice(i,1);
+  }
+}
+
+let prev = performance.now();
+function loop(now){
+  if(!running) return;
+  const dt = Math.min(32, now - prev);
+  prev = now;
+
+  update(dt, now);
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  hearts.forEach(drawHeart);
+
+  requestAnimationFrame(loop);
+}
+
+canvas.addEventListener('click', (e)=>{
+  if(!running) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  for(let i=hearts.length-1; i>=0; i--){
+    const h = hearts[i];
+    const dx = mx - h.x;
+    const dy = my - h.y;
+    const r = h.size * 1.2;
+    if(Math.abs(dx) < r && Math.abs(dy) < r && !h.clicked){
+      h.clicked = true;
+      try{ popSound.currentTime = 0; popSound.play(); }catch(_){}
+      canvas.classList.add('thump'); setTimeout(()=>canvas.classList.remove('thump'), 120);
+
+      score++;
+      scoreEl.textContent = score;
+
+      if(score >= 10){
+        running = false;
+        winBadge.style.display = 'flex';
+        const shoot = () => confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+        shoot(); setTimeout(shoot, 260);
+      }
+      break;
+    }
+  }
+});
+
+// Start game saat masuk step 7
+function startGame(){
+  hearts = [];
+  score = 0;
+  scoreEl.textContent = score;
+  winBadge.style.display = 'none';
+  lastSpawn = 0;
+  ensureVisibleThenResize();   // ukur setelah tampil -> mencegah "kepotong"
+  running = true;
+  prev = performance.now();
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
